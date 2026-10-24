@@ -1,5 +1,3 @@
-
-cat > /root/vps-init.sh <<'EOF'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
@@ -93,7 +91,3 @@ last -n 5 reboot || true
 echo
 echo "===== VPS initialization completed ====="
 echo "Reconnect SSH to apply the new login locale."
-EOF
-
-bash /root/vps-init.sh
-
