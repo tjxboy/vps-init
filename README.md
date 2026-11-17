@@ -15,6 +15,63 @@ curl -fsSL https://raw.githubusercontent.com/tjxboy/vps-init/main/setup-tailscal
 输出 VPS 的 Tailscale IP 和运行状态。
 
 
+
+2. 配置 Tailscale Peer Relay 授权
+这是目前另一个非常重要的缺失项。
+
+打开：
+Tailscale Access Controls选择 JSON Editor。
+
+找到现有的 "grants" 数组，在数组中增加下面这条规则：
+
+{
+  "src": [
+    "公司电脑的tailscale IP/32"
+  ],
+  "dst": [
+    "VPS电脑的tailscale IP"
+  ],
+  "app": {
+    "tailscale.com/cap/relay": []
+  }
+}
+
+
+
+这条规则的含义：
+参数	作用
+src	允许家庭和公司电脑使用中继
+dst	指定美国 VPS
+cap/relay	授予 Peer Relay 使用权限
+
+我把两个客户端都放进 src，这样无论从家里主动连接公司，还是从公司主动连接家里，都可以使用这台 VPS。
+
+重要：不要用这段 JSON 替换整个现有 ACL / Grants 文件。 只把这个对象合并进现有的 grants 数组，保留其他规则。
+
+Tailscale 官方明确要求使用 tailscale.com/cap/relay 授权，而且不需要另外给 Peer Relay 增加普通网络访问授权。
+Tailscale Docs+1
+
+三、配置完成后重新测试
+先在家里电脑执行：
+tailscale ping --c=10 公司电脑的tailscale IP
+
+再执行：
+tailscale status
+
+预期看到类似：
+active; peer-relay VPS的实际IP:40000:vni:...
+
+这才表示真正使用了自己的美国 VPS。
+
+
+
+
+
+
+
+
+
+
 # Tailscale Peer Relay 检查工具包
 
 适用：Debian/Linux VPS；Windows 家庭/公司客户端；默认 Peer Relay UDP 端口 `40000`。
